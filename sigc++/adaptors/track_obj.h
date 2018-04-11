@@ -80,11 +80,6 @@ public:
   {
   }
 
-  /** Invokes the wrapped functor.
-   * @return The return value of the functor invocation.
-   */
-  decltype(auto) operator()() { return this->functor_(); }
-
   /** Invokes the wrapped functor passing on the arguments.
    * @param arg Arguments to be passed on to the functor.
    * @return The return value of the functor invocation.
@@ -92,8 +87,7 @@ public:
   template <typename... T_arg>
   decltype(auto) operator()(T_arg&&... arg)
   {
-    return this->functor_.template operator()<type_trait_pass_t<T_arg>...>(
-      std::forward<T_arg>(arg)...);
+    return std::invoke(this->functor_, std::forward<T_arg>(arg)...);
   }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

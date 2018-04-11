@@ -80,7 +80,7 @@ struct exception_catch_functor : public adapts<T_functor>
   {
     try
     {
-      return this->functor_();
+      return std::invoke(this->functor_);
     }
     catch (...)
     {
@@ -93,7 +93,7 @@ struct exception_catch_functor : public adapts<T_functor>
   {
     try
     {
-      return this->functor_.template operator()<type_trait_pass_t<T_arg>...>(a...);
+      return std::invoke(this->functor_, a...);
     }
     catch (...)
     {

@@ -36,12 +36,10 @@ namespace sigc
 template <typename T_return, typename T_functor>
 struct retype_return_functor : public adapts<T_functor>
 {
-  T_return operator()();
-
   template <typename... T_arg>
   inline T_return operator()(T_arg&&... a)
   {
-    return T_return(this->functor_.template operator() < T_arg... > (std::forward<T_arg>(a)...));
+    return T_return(std::invoke(this->functor_, std::forward<T_arg>(a)...));
   }
 
   retype_return_functor() = default;
@@ -56,13 +54,6 @@ struct retype_return_functor : public adapts<T_functor>
   }
 };
 
-template <typename T_return, typename T_functor>
-T_return
-retype_return_functor<T_return, T_functor>::operator()()
-{
-  return T_return(this->functor_());
-}
-
 /** Adaptor that performs a C-style cast on the return value of a functor.
  * This template specialization is for a void return. It drops the return value of the functor it
  * invokes.
@@ -76,24 +67,15 @@ retype_return_functor<T_return, T_functor>::operator()()
 template <typename T_functor>
 struct retype_return_functor<void, T_functor> : public adapts<T_functor>
 {
-  void operator()();
-
   template <typename... T_arg>
   inline void operator()(T_arg... a)
   {
-    this->functor_.template operator()<T_arg...>(a...);
+    std::invoke(this->functor_, a...);
   }
 
   retype_return_functor() = default;
   retype_return_functor(type_trait_take_t<T_functor> functor) : adapts<T_functor>(functor) {}
 };
-
-template <typename T_functor>
-void
-retype_return_functor<void, T_functor>::operator()()
-{
-  this->functor_();
-}
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // template specialization of visitor<>::do_visit_each<>(action, functor):
